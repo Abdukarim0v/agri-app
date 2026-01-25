@@ -1,0 +1,66 @@
+name: Build & Deploy (GitOps) - Dev
+
+on:
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: write
+
+jobs:
+  build_push_bump:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set TAG (short sha)
+        id: vars
+        run: |
+          TAG="${GITHUB_SHA::7}"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & Push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            docker.io/${{ secrets.DOCKERHUB_USERNAME }}/agri-app:${{ steps.vars.outputs.tag }}
+            docker.io/${{ secrets.DOCKERHUB_USERNAME }}/agri-app:latest
+
+      - name: Update environments/dev/values.yaml image.tag
+        run: |
+          FILE="environments/dev/values.yaml"
+          TAG="${{ steps.vars.outputs.tag }}"
+
+          if [ ! -f "$FILE" ]; then
+            echo "ERROR: $FILE not found. Create it first."
+            exit 1
+          fi
+
+          # Sizdagi format: image: -> tag: "1.0"
+          # 2 ta space bilan boshlangan "tag: " qatorini almashtiradi
+          sed -i -E 's/^(  tag: ")[^"]*(")$/\1'"$TAG"'\2/' "$FILE"
+
+          echo "Updated $FILE -> tag=$TAG"
+          echo "Current tag line:"
+          grep -n "tag:" "$FILE" || true
+
+      - name: Commit & push changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+
+          git add environments/dev/values.yaml
+
+          # O'zgarish bo'lmasa commit qilmaydi (xato bermaydi)
+          git commit -m "chore(dev): bump image tag to ${{ steps.vars.outputs.tag }}" || exit 0
+          git push

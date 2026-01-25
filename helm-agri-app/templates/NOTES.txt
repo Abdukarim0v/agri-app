@@ -1,0 +1,52 @@
+1. Get the application URL by running these commands:
+{{- $svcType := (default "ClusterIP" .Values.service.type) -}}
+{{- $httpRouteEnabled := (default false .Values.httpRoute.enabled) -}}
+{{- $ingressEnabled := (default false .Values.ingress.enabled) -}}
+
+{{- if $httpRouteEnabled }}
+{{- $parentRefs := (default (list) .Values.httpRoute.parentRefs) -}}
+{{- $hostnames := (default (list) .Values.httpRoute.hostnames) -}}
+{{- $rules := (default (list) .Values.httpRoute.rules) -}}
+
+{{- if $hostnames }}
+  export APP_HOSTNAME={{ $hostnames | first }}
+{{- else if $parentRefs }}
+  export APP_HOSTNAME=$(kubectl get --namespace {{ (first $parentRefs).namespace | default .Release.Namespace }} gateway/{{ (first $parentRefs).name }} -o jsonpath="{.spec.listeners[0].hostname}")
+{{- else }}
+  echo "httpRoute.enabled=true but httpRoute.parentRefs/hostnames are not set."
+{{- end }}
+
+{{- if and $rules (first $rules).matches (first (first $rules).matches).path.value }}
+  echo "Visit http://$APP_HOSTNAME{{ (first (first $rules).matches).path.value }} to use your application"
+
+  NOTE: Your HTTPRoute depends on the listener configuration of your gateway and your HTTPRoute rules.
+  You can check the gateway configuration with:
+  kubectl get --namespace {{ (first $parentRefs).namespace | default .Release.Namespace }} gateway/{{ (first $parentRefs).name }} -o yaml
+{{- end }}
+
+{{- else if $ingressEnabled }}
+{{- range $host := .Values.ingress.hosts }}
+{{- range $host.paths }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+{{- end }}
+{{- end }}
+
+{{- else if contains "NodePort" $svcType }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "helm-agri-app.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+
+{{- else if contains "LoadBalancer" $svcType }}
+  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+  You can watch its status by running:
+  kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "helm-agri-app.fullname" . }}
+
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "helm-agri-app.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SERVICE_IP:{{ .Values.service.port }}
+
+{{- else }}
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "helm-agri-app.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+  export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+  echo "Visit http://127.0.0.1:8080 to use your application"
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
+{{- end }}

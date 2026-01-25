@@ -1,0 +1,20 @@
+replicaCount: 1
+
+image:
+  repository: fayzulloh/agri-app
+  pullPolicy: IfNotPresent
+  tag: "1.0"
+
+service:
+  type: ClusterIP
+  port: 8080
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
