@@ -1,57 +1,84 @@
-name: Build & Deploy (GitOps) - Dev
+replicaCount: 1
 
-on:
-  push:
-    branches: ["main"]
+image:
+  repository: fayzulloh/agri-app
+  pullPolicy: IfNotPresent
+  tag: "latest"   # 🔴 GitHub Actions shu joyni auto update qiladi
 
-permissions:
-  contents: write
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
 
-jobs:
-  build_push_bump:
-    runs-on: ubuntu-latest
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+podAnnotations: {}
+podLabels: {}
 
-      - name: Set TAG (short sha)
-        id: vars
-        run: |
-          TAG="${GITHUB_SHA::7}"
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
+podSecurityContext: {}
+securityContext: {}
 
-      - name: Login to DockerHub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+service:
+  type: ClusterIP
+  port: 8080
 
-      - name: Build & Push image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: |
-            docker.io/${{ secrets.DOCKERHUB_USERNAME }}/agri-app:${{ steps.vars.outputs.tag }}
-            docker.io/${{ secrets.DOCKERHUB_USERNAME }}/agri-app:latest
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: agri-dev.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
 
-      - name: Update environments/dev/values.yaml image.tag
-        run: |
-          FILE="environments/dev/values.yaml"
-          TAG="${{ steps.vars.outputs.tag }}"
+httpRoute:
+  enabled: false
+  annotations: {}
+  parentRefs: []
+  hostnames: []
+  rules: []
 
-          # sizdagi format: "  tag: "1.0" "
-          sed -i -E 's/^(  tag: ")[^"]*(")$/\1'"$TAG"'\2/' "$FILE"
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "256Mi"
 
-          echo "Updated tag to $TAG"
-          grep -n "tag:" "$FILE" || true
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
 
-      - name: Commit & push changes
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@users.noreply.github.com"
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
 
-          git add environments/dev/values.yaml
-          git commit -m "chore(dev): bump image tag to ${{ steps.vars.outputs.tag }}" || exit 0
-          git push
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+
+volumes: []
+volumeMounts: []
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+serviceMonitor:
+  enabled: true
+  path: /metrics
+  interval: 15s

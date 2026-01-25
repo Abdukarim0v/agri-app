@@ -42,15 +42,14 @@ jobs:
           TAG="${{ steps.vars.outputs.tag }}"
 
           if [ ! -f "$FILE" ]; then
-            echo "ERROR: $FILE not found. Create it first."
+            echo "ERROR: $FILE not found"
             exit 1
           fi
 
-          # Sizdagi format: image: -> tag: "1.0"
-          # 2 ta space bilan boshlangan "tag: " qatorini almashtiradi
+          # values.yaml ichidagi: '  tag: "1.0"' qatorini yangilaydi
           sed -i -E 's/^(  tag: ")[^"]*(")$/\1'"$TAG"'\2/' "$FILE"
 
-          echo "Updated $FILE -> tag=$TAG"
+          echo "Updated tag to $TAG"
           echo "Current tag line:"
           grep -n "tag:" "$FILE" || true
 
@@ -61,6 +60,6 @@ jobs:
 
           git add environments/dev/values.yaml
 
-          # O'zgarish bo'lmasa commit qilmaydi (xato bermaydi)
+          # Agar o'zgarish bo'lmasa commit qilmaydi (xato chiqarmaydi)
           git commit -m "chore(dev): bump image tag to ${{ steps.vars.outputs.tag }}" || exit 0
           git push
