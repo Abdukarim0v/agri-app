@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: fayzulloh/agri-app
   pullPolicy: IfNotPresent
-  tag: "ca5c1ae"
+  tag: "9c683e3"
 
 imagePullSecrets: []
 nameOverride: ""
