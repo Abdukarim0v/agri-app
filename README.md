@@ -27,7 +27,8 @@ The application exposes health and metrics endpoints, is fully containerized, de
 - Updates image tag for GitOps deployment
 
 📸 **GitHub Actions – Successful Pipeline**
-![GitHub Actions](screenshots/github-actions.png)
+![GitHub Actions – Successful Pipeline](screenshots/github-actions.png)
+
 
 ---
 
@@ -36,7 +37,8 @@ The application exposes health and metrics endpoints, is fully containerized, de
 ArgoCD continuously monitors the GitHub repository and ensures the Kubernetes cluster state matches the declared Helm configuration.
 
 📸 **ArgoCD Application – Healthy & Synced**
-![ArgoCD Application](screenshots/argocd-application.png)
+![ArgoCD Application – Healthy & Synced](screenshots/argocd-application.png)
+
 
 ---
 
@@ -46,6 +48,8 @@ The application and database are deployed into the `agri` namespace.
 
 📸 **Running Pods**
 ![Kubernetes Pods](screenshots/kubectl-pods.png)
+
+
 
 ---
 
@@ -67,6 +71,7 @@ The application connects to PostgreSQL using Kubernetes **Secrets** and **Cluste
 ![Health Endpoint](screenshots/health-endpoint.png)
 
 
+
 ---
 
 ## 📊 Monitoring & Observability
@@ -81,6 +86,7 @@ The application exposes metrics such as:
 📸 **Prometheus Metrics Endpoint**
 ![Prometheus Metrics](screenshots/prometheus-metrics.png)
 
+
 ---
 
 ### Grafana Dashboards
@@ -93,6 +99,7 @@ Custom Grafana dashboard visualizes:
 
 📸 **Grafana Dashboard**
 ![Grafana Dashboard](screenshots/grafana-dashboard.png)
+
 
 ---
 
