@@ -101,6 +101,14 @@ Custom Grafana dashboard visualizes:
 📸 **Grafana Dashboard**
 ![Grafana Dashboard](grafana-dashboard.png)
 
+## 🧾 Logging (Loki)
+
+Logs are collected using Loki + Promtail and explored in Grafana.
+
+📸 **Grafana Explore – Loki logs**
+![Loki logs](loki-logs.png)
+
+
 
 ---
 
