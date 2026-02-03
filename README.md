@@ -27,7 +27,8 @@ The application exposes health and metrics endpoints, is fully containerized, de
 - Updates image tag for GitOps deployment
 
 📸 **GitHub Actions – Successful Pipeline**
-![GitHub Actions – Successful Pipeline](screenshots/github-actions.png)
+![GitHub Actions – Successful Pipeline](github-actions.png)
+
 
 
 ---
@@ -37,7 +38,7 @@ The application exposes health and metrics endpoints, is fully containerized, de
 ArgoCD continuously monitors the GitHub repository and ensures the Kubernetes cluster state matches the declared Helm configuration.
 
 📸 **ArgoCD Application – Healthy & Synced**
-![ArgoCD Application – Healthy & Synced](screenshots/argocd-application.png)
+![ArgoCD Application](argocd-application.png)
 
 
 ---
@@ -47,7 +48,7 @@ ArgoCD continuously monitors the GitHub repository and ensures the Kubernetes cl
 The application and database are deployed into the `agri` namespace.
 
 📸 **Running Pods**
-![Kubernetes Pods](screenshots/kubectl-pods.png)
+![Kubernetes Pods](kubectl-pods.png)
 
 
 
@@ -68,7 +69,7 @@ The application connects to PostgreSQL using Kubernetes **Secrets** and **Cluste
 ## ❤️ Application Health Check
 
 📸 **Health Endpoint**
-![Health Endpoint](screenshots/health-endpoint.png)
+![Health Endpoint](health-endpoint.png)
 
 
 
@@ -84,7 +85,7 @@ The application exposes metrics such as:
 - Custom business metrics (harvest totals)
 
 📸 **Prometheus Metrics Endpoint**
-![Prometheus Metrics](screenshots/prometheus-metrics.png)
+![Prometheus Metrics](prometheus-metrics.png)
 
 
 ---
@@ -98,7 +99,7 @@ Custom Grafana dashboard visualizes:
 - Business metrics (harvest data)
 
 📸 **Grafana Dashboard**
-![Grafana Dashboard](screenshots/grafana-dashboard.png)
+![Grafana Dashboard](grafana-dashboard.png)
 
 
 ---
