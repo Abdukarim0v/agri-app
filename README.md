@@ -106,7 +106,7 @@ Custom Grafana dashboard visualizes:
 Logs are collected using Loki + Promtail and explored in Grafana.
 
 📸 **Grafana Explore – Loki logs**
-![Loki logs](loki-logs.png)
+![Loki logs](app-logs.png)
 
 
 
